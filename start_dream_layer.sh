@@ -157,9 +157,9 @@ main() {
         exit 1
     fi
     
-    # Check if npm is available
-    if ! command -v npm &> /dev/null; then
-        print_error "npm is not installed or not in PATH"
+    # Check if pnpm is available
+    if ! command -v pnpm &> /dev/null; then
+        print_error "pnpm is not installed or not in PATH. You can usually install it with 'npm install -g pnpm'."
         exit 1
     fi
     
@@ -207,7 +207,7 @@ main() {
     # Check if node_modules exists, if not install dependencies
     if [ ! -d "node_modules" ]; then
         print_status "Installing frontend dependencies..."
-        npm install
+        pnpm install
     fi
     
     # Start the development server
@@ -219,12 +219,11 @@ main() {
     echo $frontend_pid > "logs/frontend.pid"
     
     # Wait for frontend to start
-    sleep 3
-    
-    if check_port 8080; then
+    if wait_for_port 8080; then
         print_success "Frontend started successfully (PID: $frontend_pid)"
     else
         print_error "Frontend failed to start on port 8080"
+        print_status "Check the log file: logs/frontend.log"
         exit 1
     fi
     
