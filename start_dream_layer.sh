@@ -32,7 +32,8 @@ print_error() {
 # Function to check if port is in use
 check_port() {
     local port=$1
-    if lsof -i:$port > /dev/null 2>&1; then
+    # Use nc (netcat) for a more reliable port check, especially when running under different shells like nushell
+    if nc -z localhost $port > /dev/null 2>&1; then
         return 0 # Port is in use
     else
         return 1 # Port is free
