@@ -211,7 +211,7 @@ main() {
     fi
     
     # Start the development server
-    npm run dev > "../logs/frontend.log" 2>&1 &
+    pnpm run dev > "../logs/frontend.log" 2>&1 &
     local frontend_pid=$!
     cd ..
     
