@@ -1,3 +1,6 @@
 {
-    "Comfy.TutorialCompleted": true
+    "Comfy.TutorialCompleted": true,
+    "Comfy.Release.Version": "0.3.44",
+    "Comfy.Release.Timestamp": 1752591270635,
+    "Comfy.Queue.ImageFit": "cover"
 }
