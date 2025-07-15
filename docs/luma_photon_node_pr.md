@@ -26,6 +26,20 @@ This implementation directly addresses the requirements outlined in `docs/tasks/
 ### Output Images
 *(Please add your screenshot showing the generated image and the depth map here)*
 
+## Logs
+
+The following is a summary of the log output from a test run. It shows the successful generation and saving of the depth map, followed by the call to the Luma Photon API.
+
+It also highlights a `[Errno 36] File name too long` error from the API logging utility. This does not affect the node's execution but points to a potential issue in the logging system when filenames are generated from long URLs.
+
+```log
+Error writing API log to ...: [Errno 36] File name too long: ...
+Running MiDaS depth estimation...
+Saved depth map to /home/modernyogi/Projects/DreamLayer/Dream_Layer_Resources/output/depth/depth_4ebefa5a-5b30-4337-939a-3a83b81c2637.png
+Calling Luma Photon API...
+[DEBUG] Final headers: {'Accept': 'application/json', 'User-Agent': 'comfy-api-nodes/1.0', 'Authorization': 'Bearer ey...'}
+```
+
 ## Testing
 
 -   Verified that the node correctly loads in ComfyUI.
