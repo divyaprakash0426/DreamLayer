@@ -40,6 +40,57 @@ The required Python packages `timm`, `opencv-python`, and `lpips` are listed in 
 
 The `lpips` dependency was discovered during testing as it is required by MiDaS but was not explicitly listed in its own dependencies.
 
+## CI/CD and Model Caching
+
+To fulfill the CI requirement from `docs/tasks/task1.txt` ("CI must pass with the depth model downloaded during the GitHub Action’s cache-restore step"), a script has been added to facilitate the pre-downloading and caching of the MiDaS model.
+
+The script `scripts/download_midas.py` will download the model to a predictable local directory (`torch_hub_cache`).
+
+### Example GitHub Actions Workflow
+
+If a CI workflow (e.g., `.github/workflows/ci.yml`) is created, it can be configured to cache the MiDaS model with the following steps:
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache MiDaS model
+        id: cache-midas
+        uses: actions/cache@v4
+        with:
+          path: torch_hub_cache
+          key: ${{ runner.os }}-midas-v1
+
+      - name: Download MiDaS model if not cached
+        if: steps.cache-midas.outputs.cache-hit != 'true'
+        run: |
+          pip install torch
+          python scripts/download_midas.py
+
+      - name: Install dependencies
+        run: |
+          # Install other project dependencies
+          pip install -r ComfyUI/custom_nodes/luma_photon_node/requirements.txt
+
+      - name: Run tests with cached model
+        env:
+          TORCH_HOME: ${{ github.workspace }}/torch_hub_cache
+        run: |
+          # Your test command here
+          # e.g., pytest
+```
+
+This setup ensures that `torch.hub.load` in the node will find the pre-downloaded models via the `TORCH_HOME` environment variable, avoiding runtime downloads during tests and speeding up the CI process.
+
 ## Future Considerations
 
 The current implementation generates and saves the depth map but does not send it to the Luma API, as this was not specified in the task requirements (`docs/tasks/task1.txt`). The task only required saving the depth map for user reference.
