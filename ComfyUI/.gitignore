@@ -37,7 +37,7 @@ input/
 output/
 temp/
 models/
-custom_nodes/
+# custom_nodes/
 served_images/
 *.ckpt
 *.safetensors

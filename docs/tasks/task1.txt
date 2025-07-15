@@ -1,0 +1,8 @@
+# Model/API              
+Luma – Photon
+
+# Task
+Create a luma_photon_depth2img node that takes an input image, auto-estimates depth locally (MiDaS), then calls Photon for novel-view output.
+
+# Key deliverables / Acceptance notes
+We consider the task complete once the node chains correctly after any LOAD_IMAGE node, saves the MiDaS depth map under outputs/depth/, and includes an inline docstring explaining how to disable depth for debugging; CI must pass with the depth model downloaded during the GitHub Action’s cache-restore step.

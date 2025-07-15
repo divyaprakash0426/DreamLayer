@@ -137,9 +137,9 @@ install_nodejs() {
     fi
     
     # Ensure npm is available and up to date
-    if command_exists npm; then
+    if command_exists pnpm; then
         print_step "Updating npm..."
-        npm install -g npm@latest
+        # npm install -g npm@latest
     fi
 }
 
@@ -217,7 +217,7 @@ install_frontend_dependencies() {
         
         if [ -f "package.json" ]; then
             print_step "Installing Node.js dependencies..."
-            npm install
+            pnpm install
             print_success "Frontend dependencies installed"
         else
             print_warning "package.json not found in dream_layer_frontend"

@@ -204,3 +204,4 @@ dream_layer_backend/served_images/
  
 #VSCode
 .vscode/
+.aider*
