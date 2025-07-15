@@ -117,7 +117,7 @@ class LumaPhotonDepth2Img:
 
             print("Creating generation...")
             generation = await client.generations.image.create(
-                prompt=prompt, image_ref=[{"url": image_url}]
+                prompt=prompt, image_ref=[{"url": image_url}], model="photon-1"
             )
 
             print(f"Polling generation ID: {generation.id}")
