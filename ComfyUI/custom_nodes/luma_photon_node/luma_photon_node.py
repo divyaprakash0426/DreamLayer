@@ -6,6 +6,7 @@ import io
 import asyncio
 import aiohttp
 import uuid
+import server
 
 import folder_paths
 from lumaai import AsyncLumaAI
@@ -97,12 +98,26 @@ class LumaPhotonDepth2Img:
             temp_filepath = os.path.join(temp_dir, temp_filename)
             tensor_to_pil(image).save(temp_filepath)
 
-            print(f"Uploading image: {temp_filepath}")
-            upload_result = await client.uploads.create(file_path=temp_filepath)
+            print(f"Uploading image for Luma API: {temp_filepath}")
+            server_address = f"{server.PromptServer.instance.address}:{server.PromptServer.instance.port}"
             
+            async with aiohttp.ClientSession() as session:
+                with open(temp_filepath, "rb") as f:
+                    form_data = aiohttp.FormData()
+                    form_data.add_field('image', f, filename=os.path.basename(temp_filepath))
+                    form_data.add_field('type', 'temp')
+                    form_data.add_field('overwrite', 'true')
+
+                    async with session.post(f"http://{server_address}/upload/image", data=form_data) as resp:
+                        resp.raise_for_status()
+                        upload_data = await resp.json()
+            
+            image_url = f"http://{server_address}/view?filename={upload_data['name']}&subfolder={upload_data.get('subfolder', '')}&type={upload_data['type']}"
+            print(f"Image uploaded to {image_url}")
+
             print("Creating generation...")
             generation = await client.generations.image.create(
-                prompt=prompt, image_ref=[{"url": upload_result.download_url}], seed=seed, guidance_scale=guidance_scale
+                prompt=prompt, image_ref=[{"url": image_url}], seed=seed, guidance_scale=guidance_scale
             )
 
             print(f"Polling generation ID: {generation.id}")
