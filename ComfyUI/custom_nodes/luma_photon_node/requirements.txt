@@ -1,4 +1,2 @@
-lumaai
 timm
 opencv-python
-aiohttp
