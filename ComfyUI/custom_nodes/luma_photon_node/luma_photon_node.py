@@ -88,7 +88,7 @@ class LumaPhotonDepth2Img:
             print(f"Saved depth map to {file_path}")
 
         print("Calling Luma Photon API...")
-        client = AsyncLumaAI(api_key=api_key)
+        client = AsyncLumaAI(auth_token=api_key)
         temp_filepath = None
         try:
             temp_dir = folder_paths.get_temp_directory()
