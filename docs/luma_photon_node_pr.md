@@ -110,3 +110,11 @@ This setup ensures that `torch.hub.load` in the node will find the pre-downloade
 The current implementation generates and saves the depth map but does not send it to the Luma API, as this was not specified in the task requirements (`docs/tasks/task1.txt`). The task only required saving the depth map for user reference.
 
 A potential future enhancement could be to utilize the depth map in the API call if the Luma API supports depth-guided image-to-image generation. This would likely involve passing the depth map as an additional reference image, which could provide more structural guidance for the novel-view synthesis. This was not implemented to adhere strictly to the current set of deliverables.
+
+## Checklist
+- [ ] UI screenshot provided
+- [ ] Generated image provided  
+- [ ] Logs provided
+- [ ] Tests added (optional)
+- [ ] Code follows project style
+- [ ] Self-review completed 
