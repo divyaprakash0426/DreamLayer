@@ -3,10 +3,9 @@ import torch
 import numpy as np
 from PIL import Image
 import os
-import io
 import uuid
 import requests
-
+import logging
 import folder_paths
 from comfy_api_nodes.apis.luma_api import (
     LumaImageModel,
@@ -27,6 +26,8 @@ from comfy_api_nodes.apinode_utils import (
     process_image_response,
 )
 
+logger = logging.getLogger(__name__)
+
 # Helper to convert a PIL Image to a tensor
 def pil_to_tensor(image: Image.Image) -> torch.Tensor:
     return torch.from_numpy(np.array(image).astype(np.float32) / 255.0).unsqueeze(0)
@@ -35,6 +36,20 @@ def image_result_url_extractor(response: LumaGeneration):
     return response.assets.image if hasattr(response, "assets") and hasattr(response.assets, "image") else None
 
 class LumaPhotonDepth2Img:
+    _midas_model = None
+    _midas_transforms = None
+
+    @classmethod
+    def _get_midas_model(cls):
+        if cls._midas_model is None:
+            try:
+                cls._midas_model = torch.hub.load("intel-isl/MiDaS", "MiDaS_small", trust_repo=True)
+                cls._midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", trust_repo=True)
+            except Exception:
+                cls._midas_model = torch.hub.load("intel-isl/MiDaS", "MiDaS_small", source='github', trust_repo=True)
+                cls._midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", source='github', trust_repo=True)
+        return cls._midas_model, cls._midas_transforms
+
     @classmethod
     def INPUT_TYPES(s):
         """Defines the input types for the node."""
@@ -132,14 +147,12 @@ class LumaPhotonDepth2Img:
         depth_map_to_return = torch.zeros_like(image)
         if not disable_depth:
             print("Running MiDaS depth estimation...")
+            # Ensure image tensor has the expected shape
+            if image.dim() != 4 or image.shape[0] != 1:
+                raise ValueError(f"Expected image tensor with shape [1, H, W, C], got {image.shape}")
             img_np = (image.squeeze().numpy() * 255).astype(np.uint8)
             
-            try:
-                midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small", trust_repo=True)
-                midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", trust_repo=True)
-            except Exception:
-                midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small", source='github', trust_repo=True)
-                midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", source='github', trust_repo=True)
+            midas, midas_transforms = self._get_midas_model()
 
             device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
             midas.to(device)
@@ -161,16 +174,24 @@ class LumaPhotonDepth2Img:
             output_dir = os.path.join(folder_paths.get_output_directory(), "depth")
             os.makedirs(output_dir, exist_ok=True)
             
-            depth_map_normalized = (depth_map_tensor - depth_map_tensor.min()) / (
-                depth_map_tensor.max() - depth_map_tensor.min()
-            )
+            depth_min = depth_map_tensor.min()
+            depth_max = depth_map_tensor.max()
+            if depth_max - depth_min > 1e-8:
+                depth_map_normalized = (depth_map_tensor - depth_min) / (depth_max - depth_min)
+            else:
+                # Handle constant depth map
+                depth_map_normalized = torch.zeros_like(depth_map_tensor)
             depth_map_img = Image.fromarray(
                 (depth_map_normalized * 255).numpy().astype(np.uint8)
             )
             
             file_path = os.path.join(output_dir, f"depth_{uuid.uuid4()}.png")
-            depth_map_img.save(file_path)
-            print(f"Saved depth map to {file_path}")
+            try:
+                depth_map_img.save(file_path)
+                print(f"Saved depth map to {file_path}")
+            except (OSError, IOError) as e:
+                print(f"Warning: Failed to save depth map to {file_path}: {e}")
+                # Continue execution even if saving fails
             depth_map_to_return = pil_to_tensor(depth_map_img.convert("RGB"))
 
         if not kwargs.get("comfy_api_key"):
@@ -183,6 +204,9 @@ class LumaPhotonDepth2Img:
         download_urls = upload_images_to_comfyapi(
             image, max_images=1, auth_kwargs=auth_kwargs
         )
+        if not download_urls:
+            logger.error("Failed to upload image to ComfyAPI")
+            return (None, depth_map_to_return)
         image_url = download_urls[0]
 
         operation = SynchronousOperation(
@@ -197,7 +221,7 @@ class LumaPhotonDepth2Img:
                 model=model,
                 modify_image_ref=LumaModifyImageRef(
                     url=image_url,
-                    weight=round(max(min(1.0 - image_weight, 0.98), 0.0), 2),
+                    weight=round(max(min(image_weight, 0.98), 0.0), 2),
                 ),
             ),
             auth_kwargs=auth_kwargs,
@@ -220,6 +244,11 @@ class LumaPhotonDepth2Img:
         )
         response_poll = operation.execute()
 
-        img_response = requests.get(response_poll.assets.image)
-        img = process_image_response(img_response)
-        return (img, depth_map_to_return)
+        try:
+            img_response = requests.get(response_poll.assets.image)
+            img_response.raise_for_status()
+            img = process_image_response(img_response)
+            return (img, depth_map_to_return)
+        except requests.RequestException as e:
+            logger.error(f"Failed to download generated image: {e}")
+            return (None, depth_map_to_return)
