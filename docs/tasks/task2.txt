@@ -1,0 +1,1 @@
+Basic docker-compose.dev.yml.	Dev file runs backend + Vite front-end with live-reload. curl :3000 returns main HTML in CI.																					

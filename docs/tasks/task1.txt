@@ -1,0 +1,1 @@
+Gemini	"Add Gemini node to ComfyUI	"	Integrate Gemini API to accept text/image input and return response. Node must support chaining; test includes prompt → Gemini → downstream node.
