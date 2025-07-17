@@ -194,9 +194,14 @@ class LumaPhotonDepth2Img:
                 # Continue execution even if saving fails
             depth_map_to_return = pil_to_tensor(depth_map_img.convert("RGB"))
 
-        # Accept key injected by backend; normalise for helpers that expect
-        # comfy_api_key. If no key is present we still attempt the call.
-        api_key = kwargs.get("comfy_api_key") or kwargs.get("api_key_comfy_org")
+        # Accept key injected by backend; if running stand-alone inside ComfyUI
+        # fall back to env-vars so the login modal is avoided.
+        api_key = (
+            kwargs.get("comfy_api_key")
+            or kwargs.get("api_key_comfy_org")
+            or os.getenv("LUMA_API_KEY")          # local fallback
+            or os.getenv("API_KEY_COMFY_ORG")     # optional extra fallback
+        )
         if api_key:
             kwargs.setdefault("comfy_api_key", api_key)
 
