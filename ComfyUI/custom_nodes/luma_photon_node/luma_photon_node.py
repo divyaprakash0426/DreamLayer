@@ -194,9 +194,15 @@ class LumaPhotonDepth2Img:
                 # Continue execution even if saving fails
             depth_map_to_return = pil_to_tensor(depth_map_img.convert("RGB"))
 
-        if not kwargs.get("comfy_api_key"):
+        # accept either alias injected by backend (api_key_comfy_org) or legacy name
+        api_key = kwargs.get("comfy_api_key") or kwargs.get("api_key_comfy_org")
+
+        if not api_key:
             print("No API key provided. Skipping Luma API call and returning depth map.")
-            return (None, depth_map_to_return)
+            return (None, depth_map_to_return)          # keep original behaviour
+
+        # normalise key for downstream helpers that expect comfy_api_key
+        kwargs.setdefault("comfy_api_key", api_key)
 
         print("Calling Luma Photon API...")
         auth_kwargs = kwargs
