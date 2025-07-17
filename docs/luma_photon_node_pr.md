@@ -4,7 +4,7 @@
 
 This pull request introduces a new ComfyUI custom node, `LumaPhotonDepth2Img`, which integrates the Luma Photon API for novel-view image generation. The node takes an input image, generates a depth map locally using the MiDaS model, and then calls the Luma API to produce a new image based on a text prompt and the original input image.
 
-This implementation directly addresses the requirements outlined in `docs/tasks/task1.txt`.
+This implementation directly addresses the requirements outlined in `Dreamlayer Coding Challenge`.
 
 ## Key Changes
 
@@ -18,13 +18,18 @@ This implementation directly addresses the requirements outlined in `docs/tasks/
 ## Screenshots
 
 ### Node in ComfyUI
-*(Please add your screenshot of the node in the ComfyUI graph here)*
-
-### Example Workflow
-*(Please add your screenshot of an example workflow using the node here)*
+*
+<img width="2539" height="1504" alt="Screenshot_15-Jul_22-55-25_13905" src="https://github.com/user-attachments/assets/d1cefc34-19be-4828-8f39-c6f529a30c25" />
+<img width="2536" height="1502" alt="Screenshot_15-Jul_23-11-17_21450" src="https://github.com/user-attachments/assets/c0b6ca82-bbf4-432c-83c9-23f377fb1349" />
+<img width="2532" height="1508" alt="Screenshot_15-Jul_23-43-15_22007" src="https://github.com/user-attachments/assets/1e903d4f-9c48-490c-b193-307f6ebec47d" />
+*
 
 ### Output Images
-*(Please add your screenshot showing the generated image and the depth map here)*
+*
+<img width="640" height="427" alt="depth_2c42d071-2163-4591-a4d8-b4991eb5e002" src="https://github.com/user-attachments/assets/2405b35a-d996-4691-a51d-73bcf302cb04" />
+<img width="640" height="960" alt="depth_4ebefa5a-5b30-4337-939a-3a83b81c2637" src="https://github.com/user-attachments/assets/1e1203f6-1343-4b1b-8b74-db9b7de5d428" />
+<img width="1344" height="1792" alt="ComfyUI_temp_hdgbg_00002_" src="https://github.com/user-attachments/assets/ee485161-50c0-4476-9b23-babb2f81a3b8" />
+*
 
 ## Logs
 
@@ -56,7 +61,7 @@ The `lpips` dependency was discovered during testing as it is required by MiDaS 
 
 ## CI/CD and Model Caching
 
-To fulfill the CI requirement from `docs/tasks/task1.txt` ("CI must pass with the depth model downloaded during the GitHub Action’s cache-restore step"), a script has been added to facilitate the pre-downloading and caching of the MiDaS model.
+To fulfill the CI requirement from `Dreamlayer Coding Challenge` ("CI must pass with the depth model downloaded during the GitHub Action’s cache-restore step"), a script has been added to facilitate the pre-downloading and caching of the MiDaS model.
 
 The script `scripts/download_midas.py` will download the model to a predictable local directory (`torch_hub_cache`).
 
@@ -107,14 +112,15 @@ This setup ensures that `torch.hub.load` in the node will find the pre-downloade
 
 ## Future Considerations
 
-The current implementation generates and saves the depth map but does not send it to the Luma API, as this was not specified in the task requirements (`docs/tasks/task1.txt`). The task only required saving the depth map for user reference.
+The current implementation generates and saves the depth map but does not send it to the Luma API, as this was not specified in the task requirements (`Dreamlayer Coding Challenge`). The task only required saving the depth map for user reference.
 
 A potential future enhancement could be to utilize the depth map in the API call if the Luma API supports depth-guided image-to-image generation. This would likely involve passing the depth map as an additional reference image, which could provide more structural guidance for the novel-view synthesis. This was not implemented to adhere strictly to the current set of deliverables.
 
 ## Checklist
-- [ ] UI screenshot provided
-- [ ] Generated image provided  
-- [ ] Logs provided
+- [x] UI screenshot provided
+- [x] Generated image provided  
+- [x] Logs provided
 - [ ] Tests added (optional)
-- [ ] Code follows project style
-- [ ] Self-review completed 
+- [x] Code follows project style
+- [x] Self-review completed 
+
