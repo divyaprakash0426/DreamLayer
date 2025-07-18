@@ -139,12 +139,12 @@ def inject_api_keys_into_workflow(workflow: Dict[str, Any]) -> Dict[str, Any]:
         elif "OPENAI_API_KEY" in needed_env_keys and "OPENAI_API_KEY" in all_api_keys:
             api_key_comfy_org = all_api_keys["OPENAI_API_KEY"]
             print(f"[DEBUG] Using OPENAI_API_KEY for api_key_comfy_org")
-        elif "LUMA_API_KEY" in needed_env_keys and "LUMA_API_KEY" in all_api_keys:
-            api_key_comfy_org = all_api_keys["LUMA_API_KEY"]
-            print(f"[DEBUG] Using LUMA_API_KEY for api_key_comfy_org")
         elif "IDEOGRAM_API_KEY" in needed_env_keys and "IDEOGRAM_API_KEY" in all_api_keys:
             api_key_comfy_org = all_api_keys["IDEOGRAM_API_KEY"]
             print(f"[DEBUG] Using IDEOGRAM_API_KEY for api_key_comfy_org")
+        elif "LUMA_API_KEY" in needed_env_keys and "LUMA_API_KEY" in all_api_keys:
+            api_key_comfy_org = all_api_keys["LUMA_API_KEY"]
+            print(f"[DEBUG] Using LUMA_API_KEY for api_key_comfy_org")
         else:
             print(f"[DEBUG] No available API keys for needed services: {needed_env_keys}")
     

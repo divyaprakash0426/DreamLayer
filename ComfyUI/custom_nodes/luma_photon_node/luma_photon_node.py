@@ -102,7 +102,7 @@ class LumaPhotonDepth2Img:
             "hidden": {
                 "unique_id": "UNIQUE_ID",
                 "auth_token": "AUTH_TOKEN_COMFY_ORG",
-                "comfy_api_key": "api_key_comfy_org",
+                "comfy_api_key": "API_KEY_COMFY_ORG",
             },
         }
 
